@@ -1,5 +1,6 @@
 import os
 import sys
+import timeit
 from lib.conf import get_conf
 from lib.log import Log_Json, Log_Txt
 
@@ -98,8 +99,10 @@ def run_project(name, run_file = 'run'):
         # if RUN_ENV != 'dev':
         #     sys.path[0] = new_path
         pack = importlib.import_module(run_file)
+        start_time = timeit.default_timer()
         pack.__main__()
-        log.print(title='run_project', type='INFO', msg=f'run {name} over.')
+        use_time = str(timeit.default_timer() - start_time)
+        log.print(title='run_project', type='INFO', msg=f'run {name} over. use_time: {use_time} s')
     else:
         raise Exception(f'Error: path not exits "{new_path}"')
 
