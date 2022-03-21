@@ -1,7 +1,10 @@
+# ide
+.vscode
 
-log
-
-tmp
-
+# python
 __pycache__
 
+
+# server & project
+tmp
+log
