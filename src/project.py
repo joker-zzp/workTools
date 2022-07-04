@@ -1,24 +1,31 @@
 import os
 import sys
-import timeit
-from lib.conf import get_conf
-from lib.log import Log_Json, Log_Txt
-
+from utils.conf import Conf_InI as InI
+from utils.Jlog import Log_Json, Log_Txt
 
 global CONF_PATH, CONF
 
 CONF_PATH = 'configs/server.ini'
-CONF = get_conf(CONF_PATH)
+CONF = InI.get_conf(CONF_PATH)
 RUN_ENV = CONF.get('run').get('env')
 
 base_run_text = \
-'''
+'''# 在此 导入 main 方法替换此main方法 使用 from src.main import main
 
 def main():
     print('hello world')
 
 def __main__():main()
+
+if __name__ == "__main__":
+    __main__()
 '''
+
+__all__ = [
+    'RUN_ENV',
+    'create_project',
+    'run_project'
+]
 
 def create_project(name:str, template = None):
     """创建脚本项目
@@ -70,7 +77,6 @@ def create_project(name:str, template = None):
                 os.symlink(link_path, i['link'])
             else:
                 print('文件夹创建失败')
-            # print(link_path)
 
     # 创建运行文件
     with open(f'{root}/run.py', 'w') as f:
@@ -80,34 +86,39 @@ def run_project(name, run_file = 'run'):
     global CONF
 
     LOG_CONF = CONF.get('log')
+    print(LOG_CONF)
     # 载入日志配置
     log = Log_Txt(**LOG_CONF)
     # 打印 日志信息
-    log.print(title='run_project', type='INFO', msg=f'run {name} start.')
-
+    log_info = {
+        'title': 'run_project',
+        'type': 'INFO',
+        'msg': f'run {name} start.'
+    }
+    # log.print(title='run_project', type='INFO', msg=f'run {name} start.')
+    log.output(**log_info)
 
     project_path = CONF.get('run').get('project_path')
     root = f'{project_path}/{name}'
     my_path = os.getcwd()
 
     new_path = os.path.join(my_path, root)
-
+    # 运行脚本
     if os.path.isdir(new_path):
         import importlib
+        # 改变当前工作目录
         os.chdir(new_path)
         sys.path[0] = new_path
         # if RUN_ENV != 'dev':
         #     sys.path[0] = new_path
         pack = importlib.import_module(run_file)
-        start_time = timeit.default_timer()
         pack.__main__()
-        use_time = str(timeit.default_timer() - start_time)
-        log.print(title='run_project', type='INFO', msg=f'run {name} over. use_time: {use_time} s')
+        # 写入日志
+        log_info.update({'msg': f'run {name} over.'})
     else:
-        raise Exception(f'Error: path not exits "{new_path}"')
-
-__all__ = [
-    'RUN_ENV',
-    'create_project',
-    'run_project'
-]
+        log_info.update({'type': 'ERROR', 'msg': f'path not exits "{new_path}"'})
+        # raise Exception(f'Error: path not exits "{new_path}"')
+    # 回到 当前项目目录
+    os.chdir(my_path)
+    # 写入日志
+    log.output(**log_info)

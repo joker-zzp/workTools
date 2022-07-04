@@ -8,6 +8,8 @@ def main():
     """
     
     name = 'hello_world'
+    # 本地测试
+    # name = 'test'
 
     """项目目录模板
 
@@ -29,15 +31,13 @@ def main():
             {'dir': 'configs', 'link': 0},
             # {'dir': 'doc', 'link': 0},
             {'dir': 'data', 'link': 0},
-            # {'dir': 'lib', 'link': f'lib/{name}'},
-            # {'dir': 'log', 'link': f'log/{name}'},
             {'dir': 'src', 'link': 0},
         ]
     }
     # 创建项目 根据模板 创建项目
-    # create_project(name, template)
+    create_project(name, template)
     # 运行 / 调试 项目
-    run_project(name)
+    # run_project(name)
     pass
 
 if __name__ == "__main__":
