@@ -12,11 +12,6 @@ def main():
     # name = 'test'
 
     """项目目录模板
-
-        server 服务 包含 文件夹
-            dir 项目中文件夹
-            link 链接地址 0 不需要创建链接
-        
         项目基本 目录介绍 
             configs 脚本配置文件
             lib     公共代码库 通用代码或定制代码存放位置
@@ -25,7 +20,6 @@ def main():
             tmp     临时存放路径
             run.py  运行 / 调试/ 打包 / 入口文件
     """
-
     template = {
         'project': [
             {'dir': 'configs', 'link': 0},
@@ -35,9 +29,9 @@ def main():
         ]
     }
     # 创建项目 根据模板 创建项目
-    create_project(name, template)
+    # create_project(name, template)
     # 运行 / 调试 项目
-    # run_project(name)
+    run_project(name)
     pass
 
 if __name__ == "__main__":

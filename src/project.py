@@ -86,7 +86,6 @@ def run_project(name, run_file = 'run'):
     global CONF
 
     LOG_CONF = CONF.get('log')
-    print(LOG_CONF)
     # 载入日志配置
     log = Log_Txt(**LOG_CONF)
     # 打印 日志信息
@@ -99,7 +98,7 @@ def run_project(name, run_file = 'run'):
     log.output(**log_info)
 
     project_path = CONF.get('run').get('project_path')
-    root = f'{project_path}/{name}'
+    root = name if project_path in name else f'{project_path}/{name}'
     my_path = os.getcwd()
 
     new_path = os.path.join(my_path, root)
