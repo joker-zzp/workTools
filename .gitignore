@@ -4,6 +4,8 @@
 # python
 __pycache__
 
+# conf
+configs/server.ini
 
 # server & project
 tmp
