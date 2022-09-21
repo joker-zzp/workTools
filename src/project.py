@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from utils.conf import Conf_InI as InI
 from utils.Jlog import Log_Json, Log_Txt
 
@@ -15,8 +16,9 @@ base_run_text = \
 def main():
     print('hello world')
 
-def __main__():main()
+def __main__(): main()
 
+# 项目独立运行时
 if __name__ == "__main__":
     __main__()
 '''
@@ -24,7 +26,7 @@ if __name__ == "__main__":
 __all__ = [
     'RUN_ENV',
     'create_project',
-    'run_project'
+    'run_project',
 ]
 
 def create_project(name:str, template = None):
@@ -55,7 +57,6 @@ def create_project(name:str, template = None):
         template = {
             'project': [
                 {'dir': 'configs'},
-                # {'dir': 'lib'},
                 {'dir': 'src'},
             ]
         }
@@ -82,10 +83,11 @@ def create_project(name:str, template = None):
     with open(f'{root}/run.py', 'w') as f:
         f.write(base_run_text)
             
-def run_project(name, run_file = 'run'):
+def run_project(name: str, run_file: str = 'run'):
     global CONF
 
     LOG_CONF = CONF.get('log')
+    RUN_CONF = CONF.get('run')
     # 载入日志配置
     log = Log_Txt(**LOG_CONF)
     # 打印 日志信息
@@ -96,11 +98,21 @@ def run_project(name, run_file = 'run'):
     }
     # log.print(title='run_project', type='INFO', msg=f'run {name} start.')
     log.output(**log_info)
-
-    project_path = CONF.get('run').get('project_path')
+    # 设置项目路径
+    project_path = RUN_CONF.get('project_path')
+    # 根目录 Project/test | test --> Project/test
     root = name if project_path in name else f'{project_path}/{name}'
+    # 打印项目名
+    if RUN_CONF.get('print_project_name'):
+        # 运行项目的真正名称
+        project_name = root[len(project_path) + 1:]
+        __symbol = '#'
+        __ps = __symbol * (len(project_name) + 10)
+        __space = ' ' * 4
+        print(f'{__ps} \n{__symbol + __space + project_name + __space + __symbol} \n{__ps} \n>>>')
+    # 当前目录
     my_path = os.getcwd()
-
+    # 新路径
     new_path = os.path.join(my_path, root)
     # 运行脚本
     if os.path.isdir(new_path):
@@ -108,16 +120,18 @@ def run_project(name, run_file = 'run'):
         # 改变当前工作目录
         os.chdir(new_path)
         sys.path[0] = new_path
-        # if RUN_ENV != 'dev':
-        #     sys.path[0] = new_path
+        # 导入 运行包
         pack = importlib.import_module(run_file)
+        # 运行 主文件 的 __main__ 方法
+        start_time = time.time_ns()
         pack.__main__()
+        run_time = time.time_ns() - start_time
         # 写入日志
-        log_info.update({'msg': f'run {name} over.'})
+        log_info.update({'msg': f'run {name} over. run_time: {run_time} ns.'})
     else:
         log_info.update({'type': 'ERROR', 'msg': f'path not exits "{new_path}"'})
         # raise Exception(f'Error: path not exits "{new_path}"')
     # 回到 当前项目目录
     os.chdir(my_path)
-    # 写入日志
+    # 输出结果 写入日志
     log.output(**log_info)

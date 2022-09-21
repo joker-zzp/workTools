@@ -100,7 +100,7 @@ def re_up(_r:str, data:str, new_data:str) -> str:
 ############ check ############
 
 # 检查数据 v2
-def check_exist_type(data:dict, not_null_list:list, data_type_dict:dict) -> dict:
+def check_exist_type(data: dict, not_null_list: list, data_type_dict: dict) -> dict:
     """数据检查 存在 & 类型
 
     Args:
@@ -143,7 +143,7 @@ def check_exist_type(data:dict, not_null_list:list, data_type_dict:dict) -> dict
     return res
 
 # 检查 key 是否存在 不存在抛出异常
-def check_key_isexit_strict(data:dict, key_list:list) -> None:
+def check_key_isexit_strict(data: dict, key_list:list) -> None:
     """检查 key 是否存在
 
     Args:
@@ -159,5 +159,36 @@ def check_key_isexit_strict(data:dict, key_list:list) -> None:
 
 ############ check ############
 
+#################### [base64 加密解密] ####################
 import base64
 
+# txt -> base64
+def txt_base64(txt: str) -> str:
+    """ txt -> base64
+    param:
+        txt: 要编码数据
+    return: 编码后文本
+    """
+    return base64.b64encode(txt.encode('utf-8')).decode("utf-8")
+
+# base64 -> txt
+def base64_txt(txt: str) -> str:
+    """ base64 -> txt
+    param:
+        txt: 要解码的数据
+    return: 解码后文本
+    """
+    return base64.b64decode(txt.encode('utf-8')).decode("utf-8")
+
+#################### [base64 加密解密] ####################
+
+#################### [url 编码解码] ####################
+from urllib import parse
+
+def urldecode(txt: str) -> str:
+    return parse.unquote(txt)
+
+def urlencode(txt: str) -> str:
+    return parse.quote(txt)
+
+#################### [url 编码解码] ####################

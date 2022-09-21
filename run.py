@@ -9,8 +9,9 @@ def main():
     
     name = 'hello_world'
     # 本地测试
-    # name = 'test'
-    name = 'yangyang'
+    name = 'test'
+    # name = 'yangyang'
+    name = 'mediatrack_bug'
 
     """项目目录模板
         项目基本 目录介绍 
