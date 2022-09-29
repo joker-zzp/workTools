@@ -29,6 +29,33 @@ __all__ = [
     'run_project',
 ]
 
+def project_info(name: str) -> dict:
+    """项目信息
+
+    Args:
+        name (str): 项目名称
+
+    Returns:
+        dict: 项目信息
+    """
+    global CONF
+    project_conf = CONF.get('project')
+    # 存放项目的路径 过滤 末尾 路径符合 / 和 \
+    project_conf_path = project_conf.get('path')[-1] if project_conf.get('path')[-1] in ['/', '\\'] else project_conf.get('path')
+    # 项目相对路径
+    project_root_path = name if project_conf_path in name else f'{project_conf_path}/{name}'
+    # 项目名称
+    project_name = project_root_path[len(project_conf_path) + 1:]
+
+    res = {
+        'project_name': project_name,
+        'project_root_path': project_root_path,
+        'project_conf_path': project_conf_path,
+        'project_conf_print': project_conf.get('print_name'),
+    }
+    # print(res)
+    return res
+
 def create_project(name:str, template = None):
     """创建脚本项目
 
@@ -84,42 +111,48 @@ def create_project(name:str, template = None):
         f.write(base_run_text)
             
 def run_project(name: str, run_file: str = 'run'):
+    """运行项目
+
+    Args:
+        name (str): 项目名称
+        run_file (str, optional): 运行项目文件. Defaults to 'run'.
+    """
     global CONF
 
     LOG_CONF = CONF.get('log')
-    RUN_CONF = CONF.get('run')
     # 载入日志配置
     log = Log_Txt(**LOG_CONF)
+    # 项目信息
+    p_info = project_info(name)
+    # 项目名称
+    p_name = p_info.get('project_name')
+
     # 打印 日志信息
     log_info = {
         'title': 'run_project',
         'type': 'INFO',
-        'msg': f'run {name} start.'
+        'msg': f'run {p_name} start.'
     }
-    # log.print(title='run_project', type='INFO', msg=f'run {name} start.')
+    # log.print(title='run_project', type='INFO', msg=f'run {p_name} start.')
     log.output(**log_info)
-    # 设置项目路径
-    project_path = RUN_CONF.get('project_path')
-    # 根目录 Project/test | test --> Project/test
-    root = name if project_path in name else f'{project_path}/{name}'
-    # 打印项目名
-    if RUN_CONF.get('print_project_name'):
-        # 运行项目的真正名称
-        project_name = root[len(project_path) + 1:]
-        __symbol = '#'
-        __ps = __symbol * (len(project_name) + 10)
-        __space = ' ' * 4
-        print(f'{__ps} \n{__symbol + __space + project_name + __space + __symbol} \n{__ps} \n>>>')
     # 当前目录
-    my_path = os.getcwd()
-    # 新路径
-    new_path = os.path.join(my_path, root)
+    current_path = os.getcwd()
+    # 项目绝对路径
+    p_abs_path = os.path.join(current_path, p_info.get('project_root_path'))
+    # 打印项目名
+    if p_info.get('project_conf_print'):
+        # 运行项目的真正名称
+        __symbol = '#'
+        __ps = __symbol * (len(p_name) + 10)
+        __space = ' ' * 4
+        print(f'{__ps} \n{__symbol + __space + p_name + __space + __symbol} \n{__ps} \n>>>')
+
     # 运行脚本
-    if os.path.isdir(new_path):
+    if os.path.isdir(p_abs_path):
         import importlib
         # 改变当前工作目录
-        os.chdir(new_path)
-        sys.path[0] = new_path
+        os.chdir(p_abs_path)
+        sys.path[0] = p_abs_path
         # 导入 运行包
         pack = importlib.import_module(run_file)
         # 运行 主文件 的 __main__ 方法
@@ -127,11 +160,13 @@ def run_project(name: str, run_file: str = 'run'):
         pack.__main__()
         run_time = time.time_ns() - start_time
         # 写入日志
-        log_info.update({'msg': f'run {name} over. run_time: {run_time} ns.'})
+        log_info.update({'msg': f'run {p_name} over. run_time: {run_time} ns.'})
+        # 回到 当前项目目录
+        os.chdir(current_path)
     else:
-        log_info.update({'type': 'ERROR', 'msg': f'path not exits "{new_path}"'})
-        # raise Exception(f'Error: path not exits "{new_path}"')
-    # 回到 当前项目目录
-    os.chdir(my_path)
+        log_info.update({'type': 'ERROR', 'msg': f'path not exits "{p_abs_path}"'})
     # 输出结果 写入日志
     log.output(**log_info)
+
+def pack_project(name: str):
+    pass
