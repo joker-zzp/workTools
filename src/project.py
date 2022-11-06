@@ -62,18 +62,17 @@ def create_project(name:str, template = None):
     Args:
         name (string): 项目名称
     """
-    global CONF, RUN_ENV
+    global RUN_ENV
     # 非开发环境 不能创建项目
     if RUN_ENV != 'dev': return
+    # 项目信息
+    p_info = project_info(name)
     # 配置文件
-    project_path = None
-    if CONF := CONF.get('run'):
-        project_path = CONF.get('project_path')
-    else: raise Exception(f'Error: 缺少配置 "project_path".')
+    project_conf_path = p_info.get('project_conf_path')
+    if not project_conf_path: raise Exception(f'Error: 缺少配置 "project_path".')
     # 检查设置文件夹是否存在 或者不是文件夹
-    if not os.path.isdir(project_path):
-        raise Exception(f'Error: 文件夹 "{project_path}" 不存在')
-    root = f'{project_path}/{name}'
+    if not os.path.isdir(project_conf_path): raise Exception(f'Error: 文件夹 "{project_conf_path}" 不存在')
+    root = p_info.get('project_root_path')
     # 判断项目是否存在
     if os.path.isdir(root):
         raise Exception('Error: 项目以存在')
