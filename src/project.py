@@ -56,17 +56,38 @@ def project_info(name: str) -> dict:
     # print(res)
     return res
 
+def _logout(o:Log_Txt, log_info:dict, msg: str = None):
+    if msg:
+        log_info.update({'msg': msg})
+    o.output(**log_info)
+
+# 创建 项目
 def create_project(name:str, template = None):
     """创建脚本项目
 
     Args:
         name (string): 项目名称
     """
-    global RUN_ENV
+    global RUN_ENV, CONF
+    # log 设置
+    LOG_CONF = CONF.get('log')
+    # 载入日志配置
+    log = Log_Txt(**LOG_CONF)
+    
     # 非开发环境 不能创建项目
     if RUN_ENV != 'dev': return
     # 项目信息
     p_info = project_info(name)
+    # 项目名称
+    p_name = p_info.get('project_name')
+
+    # 打印 日志信息
+    log_info = {
+        'title': 'create_project',
+        'type': 'INFO',
+        'msg': f'create {p_name} start.'
+    }
+    _logout(log, log_info)
     # 配置文件
     project_conf_path = p_info.get('project_conf_path')
     if not project_conf_path: raise Exception(f'Error: 缺少配置 "project_path".')
@@ -75,10 +96,13 @@ def create_project(name:str, template = None):
     root = p_info.get('project_root_path')
     # 判断项目是否存在
     if os.path.isdir(root):
+        _logout(log, log_info, msg = f'Error: {p_name} 项目以存在')
         raise Exception('Error: 项目以存在')
     else:
         # 创建 项目文件夹
         os.mkdir(root)
+        _logout(log, log_info, msg = f'mkdir {root} is ok!')
+
     if not template:
         template = {
             'project': [
@@ -95,20 +119,14 @@ def create_project(name:str, template = None):
             continue
         else:
             os.makedirs(project_dir)
-        # 创建链接
-        if i.get('link'):
-            if os.path.isdir(project_dir):
-                # 定义链接地址
-                link_path = '../' * i.get('link').count('/') + project_dir
-                # 创建链接
-                os.symlink(link_path, i['link'])
-            else:
-                print('文件夹创建失败')
-
+            _logout(log, log_info, msg = f'mkdir {project_dir} is ok!')
     # 创建运行文件
     with open(f'{root}/run.py', 'w') as f:
         f.write(base_run_text)
-            
+        _logout(log, log_info, msg = f'touch run.py is ok!')
+    _logout(log, log_info, msg = f'create {p_name} over.')
+
+# 运行 项目
 def run_project(name: str, run_file: str = 'run'):
     """运行项目
 
@@ -132,8 +150,8 @@ def run_project(name: str, run_file: str = 'run'):
         'type': 'INFO',
         'msg': f'run {p_name} start.'
     }
-    # log.print(title='run_project', type='INFO', msg=f'run {p_name} start.')
-    log.output(**log_info)
+
+    _logout(log, log_info)    
     # 当前目录
     current_path = os.getcwd()
     # 项目绝对路径
@@ -159,13 +177,19 @@ def run_project(name: str, run_file: str = 'run'):
         pack.__main__()
         run_time = time.time_ns() - start_time
         # 写入日志
-        log_info.update({'msg': f'run {p_name} over. run_time: {run_time} ns.'})
+        _logout(log, log_info, msg = f'run {p_name} over. run_time: {run_time} ns.')
         # 回到 当前项目目录
         os.chdir(current_path)
     else:
         log_info.update({'type': 'ERROR', 'msg': f'path not exits "{p_abs_path}"'})
-    # 输出结果 写入日志
-    log.output(**log_info)
+        # 输出结果 写入日志
+        _logout(log, log_info)
 
+# 打包 项目
 def pack_project(name: str):
+    global CONF
+
+    LOG_CONF = CONF.get('log')
+    # 项目信息
+    p_info = project_info(name)
     pass
