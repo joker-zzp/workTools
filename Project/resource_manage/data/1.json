@@ -1,0 +1,7 @@
+{
+  "server": "https://ddiao222.com",
+  "url": "/home/index.html",
+  "url_re": "(?<=\\\")\\d{5}(?=\\\")",
+  "video_tab_xpath": "//*[text()=\"电影\"]/../../dd[*]/a",
+  "video_data_xpath": "//ul[@class=\"vod\"]/li[*]"
+}

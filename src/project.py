@@ -1,8 +1,12 @@
 import os
 import sys
 import time
+import importlib
 from utils.conf import Conf_InI as InI
 from utils.Jlog import Log_Json, Log_Txt
+import re
+import pkgutil
+import inspect
 
 global CONF_PATH, CONF
 
@@ -56,9 +60,11 @@ def project_info(name: str) -> dict:
     # print(res)
     return res
 
-def _logout(o:Log_Txt, log_info:dict, msg: str = None):
+def _logout(o:Log_Txt, log_info:dict, t:str = None, msg: str = None):
     if msg:
         log_info.update({'msg': msg})
+    if t:
+        log_info.update({'type': t})
     o.output(**log_info)
 
 # 创建 项目
@@ -96,7 +102,7 @@ def create_project(name:str, template = None):
     root = p_info.get('project_root_path')
     # 判断项目是否存在
     if os.path.isdir(root):
-        _logout(log, log_info, msg = f'Error: {p_name} 项目以存在')
+        _logout(log, log_info, 'ERROR', msg = f'Error: {p_name} 项目以存在')
         raise Exception('Error: 项目以存在')
     else:
         # 创建 项目文件夹
@@ -166,7 +172,6 @@ def run_project(name: str, run_file: str = 'run'):
 
     # 运行脚本
     if os.path.isdir(p_abs_path):
-        import importlib
         # 改变当前工作目录
         os.chdir(p_abs_path)
         sys.path[0] = p_abs_path
@@ -177,19 +182,53 @@ def run_project(name: str, run_file: str = 'run'):
         pack.__main__()
         run_time = time.time_ns() - start_time
         # 写入日志
-        _logout(log, log_info, msg = f'run {p_name} over. run_time: {run_time} ns.')
+        _logout(log, log_info, 'INFO', msg = f'run {p_name} over. run_time: {run_time} ns.')
         # 回到 当前项目目录
         os.chdir(current_path)
     else:
-        log_info.update({'type': 'ERROR', 'msg': f'path not exits "{p_abs_path}"'})
         # 输出结果 写入日志
-        _logout(log, log_info)
+        _logout(log, log_info, 'ERROR', msg = f'path not exits "{p_abs_path}".')
 
 # 打包 项目
 def pack_project(name: str):
     global CONF
 
     LOG_CONF = CONF.get('log')
+    # 载入日志配置
+    log = Log_Txt(**LOG_CONF)
     # 项目信息
     p_info = project_info(name)
+    # 项目名称
+    p_name = p_info.get('project_name')
+    # 打印 日志信息
+    log_info = {
+        'title': 'pack_project',
+        'type': 'INFO',
+        'msg': f'pack {p_name} start.'
+    }
+
+    _logout(log, log_info)
+    # project root
+    p_root = p_info.get('project_root_path')
+    run_py = os.path.join(p_root, 'run.py')
+    print(p_root)
+    # 当前目录
+    current_path = os.getcwd()
+    # 项目绝对路径
+    p_abs_path = os.path.join(current_path, p_info.get('project_root_path'))
+    # 改变当前工作目录
+    os.chdir(p_abs_path)
+    sys.path[0] = p_abs_path
+
+    mod_len = len(sys.modules.keys())
+    # 导入 入口文件
+    tp = importlib.import_module('run')
+
+    new_module = list(sys.modules.keys())[mod_len:]
+    lib_utils_list = [i for i in new_module if i.startswith('lib.') or i.startswith('utils.')]
+    print(lib_utils_list)
+    
+    # 回到当前目录
+    os.chdir(current_path)
+
     pass

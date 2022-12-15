@@ -1,0 +1,32 @@
+CREATE DATABASE `resource` CHARACTER SET utf8mb4;
+
+use `resource`;
+
+CREATE TABLE `config` (
+    `id` INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '配置id',
+    `key` VARCHAR(32) NOT NULL COMMENT '配置key',
+    `show` VARCHAR(256) NULL COMMENT '显示名称',
+    `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARSET=utf8mb4 COMMENT='配置表';
+
+CREATE TABLE `service_info` (
+    `id` CHAR(32) NOT NULL PRIMARY KEY COMMENT '域名ID',
+    `service_type` VARCHAR(64) NOT NULL COMMENT '服务类型',
+    `service_url` text NULL COMMENT '服务地址',
+    `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARSET=utf8mb4 COMMENT='服务信息表';
+
+CREATE TABLE `file_info` (
+    `id` CHAR(32) NOT NULL PRIMARY KEY  COMMENT '文件ID',
+    `file_name` VARCHAR(64) NOT NULL COMMENT '文件名称',
+    `file_type` INT(6) NULL COMMENT '文件类型 - config_id',
+    `file_herf` text NULL COMMENT '文件链接',
+    `file_path` text NULL COMMENT '文件路径',
+    `file_label` text NULL COMMENT '文件标签',
+    `service_id` CHAR(32) NULL COMMENT '服务ID',
+    `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间'
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARSET=utf8mb4 COMMENT='文件信息表';
+

@@ -1,4 +1,4 @@
-from src.project import create_project, run_project, RUN_ENV
+from src.project import create_project, run_project, pack_project, RUN_ENV
 import getopt
 import sys
 
@@ -37,7 +37,9 @@ def main():
     # 创建项目 根据模板 创建项目
     # create_project(name, template)
     # 运行 / 调试 项目
-    run_project(name)
+    # run_project(name)
+    # 打包 项目
+    pack_project(name)
     pass
 
 if __name__ == "__main__":
